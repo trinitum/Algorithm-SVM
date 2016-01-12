@@ -106,7 +106,7 @@ double DataSet::getAttribute(int k) {
 
 
 SVM::SVM(int st, int kt, int d, double g, double c0, double C, double nu,
-	 double e) {
+	 double e, int p) {
 
   // Default parameter settings.
   param.svm_type = st;
@@ -123,7 +123,7 @@ SVM::SVM(int st, int kt, int d, double g, double c0, double C, double nu,
   param.nr_weight = 0;
   param.weight_label = NULL;
   param.weight = NULL;
-  param.probability = 0;
+  param.probability = p;
 	nelem=0;
  
   x_space = NULL;	

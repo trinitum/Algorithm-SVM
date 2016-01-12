@@ -162,6 +162,9 @@ New SVM's can be created using the following parameters:
   Epsilon - Sets the epsilon in the loss function of epsilon-SVR's.
             Default is 0.1.
 
+  Probability - Whether to train model for probability estimates.
+                Default is 0.
+
 For a more detailed explanation of what the above parameters actually do,
 refer to the documentation distributed with libsvm.
 
@@ -298,9 +301,10 @@ sub new {
   my $c       = exists($args{C}) ? $args{C} + 0 : 1;
   my $nu      = exists($args{Nu}) ? $args{Nu} + 0 : 0.5;
   my $epsilon = exists($args{Epsilon}) ? $args{Epsilon} + 0 : 0.1;
+  my $prob    = exists($args{Probability}) ? $args{Probability} + 0 : 1;
 
   $self->{svm} = _new_svm($svmtype, $kernel, $degree, $gamma, $coef0,
-			  $c, $nu, $epsilon);
+			  $c, $nu, $epsilon, $prob);
 
   # Load the model if one was specified.
   if(my $model = $args{Model}) {

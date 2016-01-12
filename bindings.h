@@ -35,7 +35,7 @@ class DataSet {
 class SVM {
  public:
   SVM(int st, int kt, int d, double g, double c0, double C, double nu,
-      double e);
+      double e, int p);
   void   addDataSet(DataSet *ds);
   int    saveModel(char *filename);
   int    loadModel(char *filename);

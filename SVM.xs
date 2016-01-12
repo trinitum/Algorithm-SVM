@@ -22,9 +22,9 @@ DataSet *_new_dataset(double l) {
 }
 
 SVM *_new_svm(int st, int kt, int d, double g, double c0, double C,
-	      double nu, double e) {
+	      double nu, double e, int p) {
 
-  return new SVM(st, kt, d, g, c0, C, nu, e);
+  return new SVM(st, kt, d, g, c0, C, nu, e, p);
 }
 
 MODULE = Algorithm::SVM::DataSet	PACKAGE = Algorithm::SVM::DataSet
@@ -90,7 +90,7 @@ DataSet::DESTROY()
 MODULE = Algorithm::SVM			PACKAGE = Algorithm::SVM
 
 SVM *
-_new_svm(st,kt,d,g,c0,C,nu,e)
+_new_svm(st,kt,d,g,c0,C,nu,e,p)
      int st
      int kt
      int d
@@ -99,6 +99,7 @@ _new_svm(st,kt,d,g,c0,C,nu,e)
      double C
      double nu
      double e
+     int p
 
 void
 SVM::_addDataSet(ds)

@@ -339,6 +339,16 @@ sub predict_value {
   return _predict_value($self->{svm}, $x);
  }
 
+sub predict_probability {
+  my ($self, $x, $prob) = @_;
+
+  # Check if we got a dataset object.
+  croak("Not an Algorithm::DataSet") if(ref($x) ne "Algorithm::SVM::DataSet");
+  croak("second argument should be an array reference") if ref $prob ne 'ARRAY';
+
+  return _predict_probability($self->{svm}, $x, $prob);
+}
+
 sub save {
   my ($self, $file) = @_;
 

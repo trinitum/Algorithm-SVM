@@ -43,6 +43,7 @@ class SVM {
   int    train(int retrain);
   double predict_value(DataSet *ds);
   double predict(DataSet *ds);
+  double predict_probability(DataSet *ds, double *prob_estimates);
 	void   free_x_space();
   void   setSVMType(int st) { param.svm_type = st; }
   int    getSVMType() { return param.svm_type; }

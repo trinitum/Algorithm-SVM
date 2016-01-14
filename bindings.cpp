@@ -266,6 +266,16 @@ double SVM::predict(DataSet *ds) {
   return pred;
 }
 
+double SVM::predict_probability(DataSet *ds, double *prob_estimates) {
+    double pred;
+
+    if(ds == NULL) return 0;
+
+    pred = svm_predict_probability(model, ds->attributes, prob_estimates);
+
+    return pred;
+}
+
 int SVM::saveModel(char *filename) {
 
   if((model == NULL) || (filename == NULL)) {

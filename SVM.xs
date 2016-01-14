@@ -144,6 +144,26 @@ SVM::_predict(ds)
     OUTPUT:
       RETVAL
 
+double
+SVM::_predict_probability(ds, prob)
+     DataSet *ds
+     AV *prob
+    INIT:
+     int i;
+     int nr_class;
+     double *prob_estimates;
+    CODE:
+     nr_class = THIS->getNRClass();
+     Newx(prob_estimates, nr_class, double);
+     RETVAL = THIS->predict_probability(ds, prob_estimates);
+     av_clear(prob);
+     for (i = 0; i < nr_class; i++) {
+         av_push(prob, newSVnv(prob_estimates[i]));
+     }
+     Safefree(prob_estimates);
+    OUTPUT:
+     RETVAL
+
 int
 SVM::_saveModel(filename)
      char *filename

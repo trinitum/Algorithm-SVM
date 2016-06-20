@@ -282,7 +282,6 @@ you very much!
 
 sub new {
   my ($class, %args) = @_;
-  my $self = bless({ }, $class);
 
   # Ensure we have a valid SVM type.
   $args{Type} = 'C-SVC' if(! exists($args{Type}));
@@ -303,7 +302,7 @@ sub new {
   my $epsilon = exists($args{Epsilon}) ? $args{Epsilon} + 0 : 0.1;
   my $prob    = exists($args{Probability}) ? $args{Probability} + 0 : 1;
 
-  $self->{svm} = _new_svm($svmtype, $kernel, $degree, $gamma, $coef0,
+  my $self = _new_svm($svmtype, $kernel, $degree, $gamma, $coef0,
 			  $c, $nu, $epsilon, $prob);
 
   # Load the model if one was specified.
@@ -312,10 +311,8 @@ sub new {
       if((! -r $model) || (! -f $model));
 
     # Load the model.
-    $self->load($model);
-
-    # Ensure that the model loaded correctly.
-    croak("Error loading model file: $model") if(! $self->{svm});
+    $self->load($model)
+      or croak("Error loading model file: $model");
   }
 
   return $self;
@@ -327,7 +324,7 @@ sub predict {
   # Check if we got a dataset object.
   croak("Not an Algorithm::DataSet") if(ref($x) ne "Algorithm::SVM::DataSet");
 
-  return _predict($self->{svm}, $x);
+  return _predict($self, $x);
  }
 
 sub predict_value {
@@ -336,7 +333,7 @@ sub predict_value {
   # Check if we got a dataset object.
   croak("Not an Algorithm::DataSet") if(ref($x) ne "Algorithm::SVM::DataSet");
 
-  return _predict_value($self->{svm}, $x);
+  return _predict_value($self, $x);
  }
 
 sub predict_probability {
@@ -346,7 +343,7 @@ sub predict_probability {
   croak("Not an Algorithm::DataSet") if(ref($x) ne "Algorithm::SVM::DataSet");
   croak("second argument should be an array reference") if ref $prob ne 'ARRAY';
 
-  return _predict_probability($self->{svm}, $x, $prob);
+  return _predict_probability($self, $x, $prob);
 }
 
 sub save {
@@ -354,7 +351,7 @@ sub save {
 
   croak("Can't save model because no filename provided") if(! $file);
 
-  return _saveModel($self->{svm}, $file);
+  return _saveModel($self, $file);
 }
 
 sub load {
@@ -362,13 +359,13 @@ sub load {
 
   croak("Can't load model because no filename provided") if(! $file);
 
-  return _loadModel($self->{svm}, $file);
+  return _loadModel($self, $file);
 }
 
 sub getNRClass {
     my ($self) = @_;
 
-    return _getNRClass($self->{svm});
+    return _getNRClass($self);
 }
 
 sub getLabels {
@@ -376,7 +373,7 @@ sub getLabels {
 
     my $class = $self->getNRClass();
     if($class) {
-	return _getLabels($self->{svm}, $class);
+	return _getLabels($self, $class);
     }
 
     return 0;
@@ -385,13 +382,13 @@ sub getLabels {
 sub getSVRProbability {
     my ($self) = @_;
 
-    return _getSVRProbability($self->{svm});
+    return _getSVRProbability($self);
 }
 
 sub checkProbabilityModel {
     my ($self) = @_;
 
-    return _checkProbabilityModel($self->{svm});
+    return _checkProbabilityModel($self);
 }
 
 sub train {
@@ -400,7 +397,7 @@ sub train {
   croak("No training data provided") if(! @tset);
 
   # Delete the old training data.
-  _clearDataSet($self->{svm});
+  _clearDataSet($self);
 
   # Ensure we've got the right format for the training data.
   for(@tset) {
@@ -409,15 +406,15 @@ sub train {
   }
 
   # Train a new model.
-  _addDataSet($self->{svm}, $_) for(@tset);
+  _addDataSet($self, $_) for(@tset);
 
-  return _train($self->{svm}, 0);
+  return _train($self, 0);
 }
 
 sub retrain {
   my $self = shift;
 
-  return _train($self->{svm}, 1);
+  return _train($self, 1);
 }
 
 sub validate {
@@ -426,7 +423,7 @@ sub validate {
   $nfolds = 5 if(! defined($nfolds));
   croak("NumFolds must be >= 2") if($nfolds < 2);
 
-  return _crossValidate($self->{svm}, $nfolds + 0);
+  return _crossValidate($self, $nfolds + 0);
 }
 
 sub svm_type {
@@ -434,9 +431,9 @@ sub svm_type {
 
   if(defined($type)) {
     croak("Invalid SVM type: $type") if(! exists($SVM_TYPES{$type}));
-    _setSVMType($self->{svm}, $SVM_TYPES{$type});
+    _setSVMType($self, $SVM_TYPES{$type});
   } else {
-    $SVM_TYPESR{_getSVMType($self->{svm})};
+    $SVM_TYPESR{_getSVMType($self)};
   }
 }
 
@@ -445,51 +442,51 @@ sub kernel_type {
 
   if(defined($type)) {
     croak("Invalid kernel type: $type") if(! exists($KERNEL_TYPES{$type}));
-    _setKernelType($self->{svm}, $KERNEL_TYPES{$type});
+    _setKernelType($self, $KERNEL_TYPES{$type});
   } else {
-    $KERNEL_TYPESR{_getKernelType($self->{svm})};
+    $KERNEL_TYPESR{_getKernelType($self)};
   }
 }
 
 sub degree {
   my $self = shift;
 
-  (@_) ? _setDegree($self->{svm}, shift(@_) + 0) : _getDegree($self->{svm});
+  (@_) ? _setDegree($self, shift(@_) + 0) : _getDegree($self);
 }
 
 sub gamma {
   my $self = shift;
 
-  (@_) ? _setGamma($self->{svm}, shift(@_) + 0) : _getGamma($self->{svm});
+  (@_) ? _setGamma($self, shift(@_) + 0) : _getGamma($self);
 }
 sub coef0 {
   my $self = shift;
 
-  (@_) ? _setCoef0($self->{svm}, shift(@_) + 0) : _getCoef0($self->{svm});
+  (@_) ? _setCoef0($self, shift(@_) + 0) : _getCoef0($self);
 }
 
 sub C {
   my $self = shift;
 
-  (@_) ? _setC($self->{svm}, shift(@_) + 0) : _getC($self->{svm});
+  (@_) ? _setC($self, shift(@_) + 0) : _getC($self);
 }
 
 sub nu {
   my $self = shift;
 
-  (@_) ? _setNu($self->{svm}, shift(@_) + 0) : _getNu($self->{svm});
+  (@_) ? _setNu($self, shift(@_) + 0) : _getNu($self);
 }
 
 sub epsilon {
   my $self = shift;
 
-  (@_) ? _setEpsilon($self->{svm}, shift(@_) + 0) : _getEpsilon($self->{svm});
+  (@_) ? _setEpsilon($self, shift(@_) + 0) : _getEpsilon($self);
 }
 
 sub display {
   my $self = shift;
 
-  _dumpDataSet($self->{svm});
+  _dumpDataSet($self);
 }
 
 1;

@@ -77,7 +77,7 @@ print("Checking NRClass\n");
 ok($svm->getNRClass(), 3);
 
 print("Checking model labels\n");
-ok($svm->getLabels(), (10, 0, -10));
+ok($svm->getLabels(), -10);
 
 my $cnt=0;
 for (my $i=1; $i<=@d1; $i++) {
